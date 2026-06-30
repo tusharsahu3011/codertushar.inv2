@@ -64,30 +64,34 @@ export default function Terminal() {
                     </div>
 
                     {/* Terminal Body */}
-                    <div className="space-y-3 p-8 font-mono text-sm leading-7">
+                    <div className="h-[320px] overflow-hidden p-8 font-mono text-sm leading-7">
 
-                        {visibleLines.map((line, index) => (
-                            <p
-                                key={index}
-                                className={
-                                    line.startsWith("$") || line.startsWith("✓")
-                                        ? "text-emerald-400"
-                                        : "text-zinc-400"
-                                }
-                            >
-                                {line}
-                            </p>
-                        ))}
+                        <div className="space-y-3">
+                            {visibleLines.map((line, index) => (
+                                <p
+                                    key={index}
+                                    className={
+                                        line.startsWith("$") || line.startsWith("✓")
+                                            ? "text-emerald-400"
+                                            : "text-zinc-400"
+                                    }
+                                >
+                                    {line}
+                                </p>
+                            ))}
 
-                        <motion.div
-                            animate={{ opacity: [1, 0, 1] }}
-                            transition={{
-                                duration: 1,
-                                repeat: Infinity,
-                                ease: "linear",
-                            }}
-                            className="inline-block h-5 w-2 rounded-sm bg-emerald-400"
-                        />
+                            <div className="mt-3">
+                                <motion.div
+                                    animate={{ opacity: [1, 0, 1] }}
+                                    transition={{
+                                        duration: 1,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                    }}
+                                    className="inline-block h-5 w-2 rounded-sm bg-emerald-400"
+                                />
+                            </div>
+                        </div>
 
                     </div>
 
