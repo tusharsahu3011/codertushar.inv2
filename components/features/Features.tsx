@@ -66,7 +66,7 @@ export default function Features() {
                     <div className="mb-14 text-center">
 
                         <p className="mb-3 text-sm uppercase tracking-[0.3em] text-blue-400">
-                            What's Coming
+                            {"What's Coming"}
                         </p>
 
                         <h2 className="text-4xl font-bold text-white md:text-5xl">
@@ -83,8 +83,6 @@ export default function Features() {
                 <Reveal>
                     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                         {features.map((feature) => {
-                            const Icon = feature.icon;
-
                             return (
                                 <FeatureCard
                                     key={feature.title}

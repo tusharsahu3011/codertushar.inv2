@@ -25,7 +25,7 @@ export default function WelcomeEmail({
             <Head />
 
             <Preview>
-                🎉 Welcome to Coder Tushar • You're officially on the waitlist.
+                🎉 Welcome to Coder Tushar • {"You're"} officially on the waitlist.
             </Preview>
 
             <Body
@@ -163,8 +163,8 @@ export default function WelcomeEmail({
                             <br />
                             <br />
 
-                            You're officially one of our early supporters and
-                            you'll receive an email the moment
+                            {"You're"} officially one of our early supporters and 
+                            {"you'll"} receive an email the moment
                             <strong style={{ color: "#ffffff" }}>
                                 {" "}
                                 codertushar.in
@@ -297,7 +297,7 @@ export default function WelcomeEmail({
                                 marginBottom: "28px",
                             }}
                         >
-                            What you'll receive
+                            {"What you'll receive"}
                         </Heading>
 
                         <table
@@ -476,7 +476,7 @@ export default function WelcomeEmail({
                                 marginBottom: "20px",
                             }}
                         >
-                            You're now officially part of the first group of developers
+                            {"You're"} now officially part of the first group of developers
                             who will experience <strong>Coder Tushar</strong> before
                             everyone else.
                         </Text>
@@ -489,7 +489,7 @@ export default function WelcomeEmail({
                                 marginBottom: "20px",
                             }}
                         >
-                            I'm working hard to build a platform focused on practical
+                            {"I'm"} working hard to build a platform focused on practical
                             learning, real-world projects and developer resources that
                             actually help you become a better programmer.
                         </Text>
@@ -501,7 +501,7 @@ export default function WelcomeEmail({
                                 lineHeight: "30px",
                             }}
                         >
-                            Until then, keep coding and I'll let you know the moment
+                            Until then, keep coding and {"I'll"} let you know the moment
                             everything is ready.
                         </Text>
 

@@ -19,7 +19,7 @@ export default function NotFound() {
                     </h1>
 
                     <p className="mt-6 text-lg text-zinc-400">
-                        The page you're looking for doesn't exist or has been moved.
+                        The page You&apos;re looking for doesn&apos;t exist or has been moved.
                     </p>
 
                     <Link

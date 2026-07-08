@@ -38,19 +38,25 @@ export default function CodeWindow() {
                 <p className="pl-5">
                     <span className="text-emerald-400">name</span>
                     <span className="text-white">:</span>{" "}
-                    <span className="text-amber-300">"Coder Tushar"</span>,
+                    <span className="text-amber-300">
+                        {`"Coder Tushar"`}
+                    </span>,
                 </p>
 
                 <p className="pl-5">
                     <span className="text-emerald-400">status</span>
                     <span className="text-white">:</span>{" "}
-                    <span className="text-amber-300">"Building"</span>,
+                    <span className="text-amber-300">
+                        {`"Building"`}
+                    </span>,
                 </p>
 
                 <p className="pl-5">
                     <span className="text-emerald-400">launch</span>
                     <span className="text-white">:</span>{" "}
-                    <span className="text-amber-300">"Soon"</span>,
+                    <span className="text-amber-300">
+                        {`"Soon"`}
+                    </span>,
                 </p>
 
                 <p>

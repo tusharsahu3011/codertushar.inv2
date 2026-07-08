@@ -2,7 +2,10 @@
 
 import { useRef, useState, useTransition } from "react";
 
-import { Turnstile } from "@marsidev/react-turnstile";
+import {
+    Turnstile,
+    type TurnstileInstance,
+} from "@marsidev/react-turnstile";
 
 import Container from "@/components/ui/Container";
 import Reveal from "@/components/ui/Reveal";
@@ -32,8 +35,7 @@ export default function Newsletter() {
         startTransition,
     ] = useTransition();
 
-    const turnstileRef =
-        useRef<any>(null);
+    const turnstileRef = useRef<TurnstileInstance | null>(null);
 
     function resetForm() {
 
@@ -197,7 +199,7 @@ export default function Newsletter() {
 
                                 <br />
 
-                                You'll receive only launch
+                                You&apos;ll receive only launch
                                 updates—no spam, ever.
                             </p>
 
@@ -219,122 +221,91 @@ export default function Newsletter() {
                                 Email address
                             </label>
 
-                            <div
+                            <input
+                                id="newsletter-email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Enter your email address"
+                                autoComplete="email"
+                                aria-label="Email address"
+                                required
+                                disabled={isPending}
                                 className="
-                                    flex
-                                    flex-col
-                                    gap-4
-                                    sm:flex-row
-                                "
-                            >
-                                <input
-                                    id="newsletter-email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) =>
-                                        setEmail(
-                                            e.target.value
-                                        )
-                                    }
-                                    placeholder="Enter your email address"
-                                    autoComplete="email"
-                                    aria-label="Email address"
-                                    required
-                                    disabled={isPending}
-                                    className="
-                                        h-14
-                                        flex-1
-                                        rounded-2xl
-                                        border
-                                        border-white/10
-                                        bg-black/20
-                                        px-5
-                                        text-white
-                                        placeholder:text-zinc-500
-                                        outline-none
-                                        transition-all
-                                        duration-300
-                                        focus:border-blue-500/60
-                                        focus:ring-2
-                                        focus:ring-blue-500/20
-                                        disabled:cursor-not-allowed
-                                        disabled:opacity-60
-                                    "
-                                />
+        h-14
+        w-full
+        rounded-2xl
+        border
+        border-white/10
+        bg-black/20
+        px-5
+        text-white
+        placeholder:text-zinc-500
+        outline-none
+        transition-all
+        duration-300
+        focus:border-blue-500/60
+        focus:ring-2
+        focus:ring-blue-500/20
+        disabled:cursor-not-allowed
+        disabled:opacity-60
+    "
+                            />
 
-                                <button
-                                    type="submit"
-                                    disabled={
-                                        isPending ||
-                                        !turnstileToken
-                                    }
-                                    className="
-                                        h-14
-                                        rounded-2xl
-                                        bg-white
-                                        px-8
-                                        font-semibold
-                                        text-slate-900
-                                        transition-all
-                                        duration-300
-                                        hover:scale-[1.02]
-                                        hover:bg-slate-100
-                                        active:scale-[0.98]
-                                        disabled:cursor-not-allowed
-                                        disabled:opacity-60
-                                    "
-                                >
-                                    {isPending
-                                        ? "Joining..."
-                                        : "Notify Me"}
-                                </button>
-
-                            </div>
-                            {/* Turnstile */}
-
-                            <div
-                                className="
-                                    mt-6
-                                    flex
-                                    justify-center
-                                "
-                            >
+                            <div className="mt-5 flex justify-center">
                                 <Turnstile
                                     ref={turnstileRef}
                                     siteKey={
-                                        process.env
-                                            .NEXT_PUBLIC_TURNSTILE_SITE_KEY!
-                                    }
+                                        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                                     options={{
                                         theme: "dark",
                                         size: "normal",
                                     }}
                                     onSuccess={(token) => {
                                         setTurnstileToken(token);
-
                                         setSuccess(false);
                                         setMessage("");
                                     }}
                                     onExpire={() => {
                                         setTurnstileToken("");
-
                                         setSuccess(false);
-
                                         setMessage(
                                             "Verification expired. Please verify again."
                                         );
                                     }}
                                     onError={() => {
                                         setTurnstileToken("");
-
                                         setSuccess(false);
-
                                         setMessage(
                                             "Verification failed. Please try again."
                                         );
                                     }}
                                 />
                             </div>
+
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="
+        mt-5
+        h-14
+        w-full
+        rounded-2xl
+        bg-white
+        px-8
+        font-semibold
+        text-slate-900
+        transition-all
+        duration-300
+        hover:scale-[1.02]
+        hover:bg-slate-100
+        active:scale-[0.98]
+        disabled:cursor-not-allowed
+        disabled:opacity-60
+    "
+                            >
+                                {isPending ? "Joining..." : "Notify Me"}
+                            </button>
 
                         </form>
 
