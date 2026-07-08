@@ -29,22 +29,18 @@ export default function Countdown() {
         };
     };
 
-    const [timeLeft, setTimeLeft] = useState({
-        days: "00",
-        hours: "00",
-        minutes: "00",
-        seconds: "00",
-    });
+    const [timeLeft, setTimeLeft] = useState(
+        calculateTime
+    );
 
     useEffect(() => {
-        // First update immediately after hydration
-        setTimeLeft(calculateTime());
 
         const timer = setInterval(() => {
             setTimeLeft(calculateTime());
         }, 1000);
 
         return () => clearInterval(timer);
+
     }, []);
     return (
         <Section>

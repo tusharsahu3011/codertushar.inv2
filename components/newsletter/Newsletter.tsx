@@ -13,21 +13,35 @@ import { trackEvent } from "@/lib/analytics";
 
 export default function Newsletter() {
 
-    const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
-    const [success, setSuccess] = useState(false);
-
-    const [turnstileToken, setTurnstileToken] =
+    const [email, setEmail] =
         useState("");
 
-    const [isPending, startTransition] =
-        useTransition();
+    const [message, setMessage] =
+        useState("");
 
-    const turnstileRef = useRef<any>(null);
+    const [success, setSuccess] =
+        useState(false);
+
+    const [
+        turnstileToken,
+        setTurnstileToken,
+    ] = useState("");
+
+    const [
+        isPending,
+        startTransition,
+    ] = useTransition();
+
+    const turnstileRef =
+        useRef<any>(null);
 
     function resetForm() {
 
         setEmail("");
+
+        setMessage("");
+
+        setSuccess(false);
 
         setTurnstileToken("");
 
@@ -66,8 +80,11 @@ export default function Newsletter() {
             return;
 
         }
-
         startTransition(async () => {
+
+            trackEvent(
+                "notify_button_clicked"
+            );
 
             const result =
                 await subscribe(
@@ -75,9 +92,13 @@ export default function Newsletter() {
                     turnstileToken
                 );
 
-            setSuccess(result.success);
+            setSuccess(
+                result.success
+            );
 
-            setMessage(result.message);
+            setMessage(
+                result.message
+            );
 
             if (result.success) {
 
@@ -129,7 +150,11 @@ export default function Newsletter() {
                         "
                     >
 
-                        <div className="text-center">
+                        <div
+                            className="
+                                text-center
+                            "
+                        >
 
                             <p
                                 className="
@@ -142,7 +167,6 @@ export default function Newsletter() {
                             >
                                 Stay Updated
                             </p>
-
                             <h2
                                 className="
                                     text-4xl
@@ -162,63 +186,62 @@ export default function Newsletter() {
                                     text-zinc-400
                                 "
                             >
-                                Enter your email and
-                                we'll notify you the
-                                moment{" "}
+                                Join the official waitlist and
+                                get notified the moment{" "}
 
-                                <strong
-                                    className="
-                                        text-white
-                                    "
-                                >
+                                <span className="font-semibold text-white">
                                     codertushar.in
-                                </strong>
+                                </span>
 
-                                {" "}launches.
+                                {" "}goes live.
 
+                                <br />
+
+                                You'll receive only launch
+                                updates—no spam, ever.
                             </p>
-                            <form
-                                onSubmit={handleSubmit}
-                                className="
+
+                        </div>
+
+                        <form
+                            onSubmit={handleSubmit}
+                            className="
                                 mx-auto
                                 mt-10
                                 max-w-2xl
                             "
+                        >
+
+                            <label
+                                htmlFor="newsletter-email"
+                                className="sr-only"
                             >
+                                Email address
+                            </label>
 
-                                <label
-                                    htmlFor="newsletter-email"
-                                    className="sr-only"
-                                >
-                                    Email address
-                                </label>
-
-                                {/* Input + Button */}
-
-                                <div
-                                    className="
+                            <div
+                                className="
                                     flex
                                     flex-col
                                     gap-4
                                     sm:flex-row
                                 "
-                                >
-
-                                    <input
-                                        id="newsletter-email"
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) =>
-                                            setEmail(
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="Enter your email address"
-                                        autoComplete="email"
-                                        aria-label="Email address"
-                                        required
-                                        disabled={isPending}
-                                        className="
+                            >
+                                <input
+                                    id="newsletter-email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) =>
+                                        setEmail(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Enter your email address"
+                                    autoComplete="email"
+                                    aria-label="Email address"
+                                    required
+                                    disabled={isPending}
+                                    className="
                                         h-14
                                         flex-1
                                         rounded-2xl
@@ -237,20 +260,15 @@ export default function Newsletter() {
                                         disabled:cursor-not-allowed
                                         disabled:opacity-60
                                     "
-                                    />
+                                />
 
-                                    <button
-                                        type="submit"
-                                        disabled={
-                                            isPending ||
-                                            !turnstileToken
-                                        }
-                                        onClick={() =>
-                                            trackEvent(
-                                                "notify_button_clicked"
-                                            )
-                                        }
-                                        className="
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        isPending ||
+                                        !turnstileToken
+                                    }
+                                    className="
                                         h-14
                                         rounded-2xl
                                         bg-white
@@ -265,73 +283,75 @@ export default function Newsletter() {
                                         disabled:cursor-not-allowed
                                         disabled:opacity-60
                                     "
-                                    >
-                                        {isPending
-                                            ? "Joining..."
-                                            : "Notify Me"}
-                                    </button>
+                                >
+                                    {isPending
+                                        ? "Joining..."
+                                        : "Notify Me"}
+                                </button>
 
-                                </div>
+                            </div>
+                            {/* Turnstile */}
 
-                                {/* Turnstile */}
-
-                                <div
-                                    className="
+                            <div
+                                className="
                                     mt-6
                                     flex
                                     justify-center
                                 "
-                                >
-
-                                    <Turnstile
-                                        ref={turnstileRef}
-                                        siteKey={
-                                            process.env
-                                                .NEXT_PUBLIC_TURNSTILE_SITE_KEY!
-                                        }
-                                        options={{
-                                            theme: "dark",
-                                            size: "normal",
-                                        }}
-                                        onSuccess={(token) =>
-                                            setTurnstileToken(
-                                                token
-                                            )
-                                        }
-                                        onExpire={() =>
-                                            setTurnstileToken("")
-                                        }
-                                        onError={() => {
-
-                                            setTurnstileToken("");
-
-                                            setSuccess(false);
-
-                                            setMessage(
-                                                "Verification failed. Please try again."
-                                            );
-
-                                        }}
-                                    />
-
-                                </div>
-                            </form>
-
-                            {/* Status */}
-
-                            <div
-                                className="
-                                mt-6
-                                min-h-[60px]
-                            "
                             >
+                                <Turnstile
+                                    ref={turnstileRef}
+                                    siteKey={
+                                        process.env
+                                            .NEXT_PUBLIC_TURNSTILE_SITE_KEY!
+                                    }
+                                    options={{
+                                        theme: "dark",
+                                        size: "normal",
+                                    }}
+                                    onSuccess={(token) => {
+                                        setTurnstileToken(token);
 
-                                {message ? (
+                                        setSuccess(false);
+                                        setMessage("");
+                                    }}
+                                    onExpire={() => {
+                                        setTurnstileToken("");
 
-                                    <div
-                                        role="status"
-                                        aria-live="polite"
-                                        className={`
+                                        setSuccess(false);
+
+                                        setMessage(
+                                            "Verification expired. Please verify again."
+                                        );
+                                    }}
+                                    onError={() => {
+                                        setTurnstileToken("");
+
+                                        setSuccess(false);
+
+                                        setMessage(
+                                            "Verification failed. Please try again."
+                                        );
+                                    }}
+                                />
+                            </div>
+
+                        </form>
+
+                        {/* Status */}
+                        <div
+                            className="
+                                mt-6
+                                min-h-[72px]
+                            "
+                        >
+
+                            {message ? (
+
+                                <div
+                                    role="status"
+                                    aria-live="polite"
+                                    className={`
                                         rounded-2xl
                                         border
                                         px-5
@@ -343,40 +363,78 @@ export default function Newsletter() {
                                         duration-300
 
                                         ${success
-                                                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                                                : "border-red-500/20 bg-red-500/10 text-red-300"
-                                            }
+                                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                                            : "border-red-500/20 bg-red-500/10 text-red-300"
+                                        }
                                     `}
-                                    >
+                                >
 
-                                        {message}
+                                    {message}
 
-                                    </div>
+                                </div>
 
-                                ) : (
+                            ) : (
 
-                                    <p
-                                        className="
+                                <p
+                                    className="
                                         text-center
                                         text-sm
                                         leading-7
                                         text-zinc-500
                                     "
-                                    >
-                                        No spam.
-                                        {" "}
-                                        Only one email when we launch.
-                                        <br />
-                                        Your email stays private and is
-                                        never shared with third parties.
-                                    </p>
+                                >
+                                    No spam.
+                                    {" "}
+                                    Only one email when we launch.
+                                </p>
 
-                                )}
+                            )}
 
-                            </div>
+                        </div>
+                        <div
+                            className="
+                                mt-8
+                                flex
+                                flex-col
+                                items-center
+                                gap-2
+                            "
+                        >
+
+                            <p
+                                className="
+                                    text-xs
+                                    uppercase
+                                    tracking-[0.25em]
+                                    text-zinc-600
+                                "
+                            >
+                                Privacy First
+                            </p>
+
+                            <p
+                                className="
+                                    max-w-xl
+                                    text-center
+                                    text-sm
+                                    leading-7
+                                    text-zinc-500
+                                "
+                            >
+                                Your email is securely stored,
+                                never shared with third parties,
+                                and will only be used to send
+                                launch updates and important
+                                announcements about
+                                {" "}
+                                <span className="text-zinc-300">
+                                    codertushar.in
+                                </span>.
+                            </p>
 
                         </div>
 
+                    </div>
                 </Reveal>
 
             </Container>
