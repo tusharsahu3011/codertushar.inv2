@@ -7,11 +7,22 @@ import { supabase } from "@/lib/supabase";
 
 const emailRegex =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+type SubscribeResult = {
+  status:
+  | "success"
+  | "duplicate"
+  | "email_failed"
+  | "validation_error"
+  | "verification_error"
+  | "server_error";
+
+  message: string;
+};
 
 export async function subscribe(
   email: string,
   turnstileToken: string
-) {
+): Promise<SubscribeResult> {
 
   const value =
     email.trim().toLowerCase();
@@ -22,25 +33,22 @@ export async function subscribe(
 
   if (!value) {
     return {
-      success: false,
-      message:
-        "Please enter your email address.",
+      status: "validation_error",
+      message: "Please enter your email address.",
     };
   }
 
   if (!emailRegex.test(value)) {
     return {
-      success: false,
-      message:
-        "Please enter a valid email address.",
+      status: "validation_error",
+      message: "Please enter a valid email address.",
     };
   }
 
   if (!turnstileToken) {
     return {
-      success: false,
-      message:
-        "Security verification failed.",
+      status: "verification_error",
+      message: "Security verification failed.",
     };
   }
 
@@ -78,9 +86,8 @@ export async function subscribe(
     );
 
     return {
-      success: false,
-      message:
-        "Verification failed. Please try again.",
+      status: "verification_error",
+      message: "Verification failed. Please try again.",
     };
 
   }
@@ -103,9 +110,8 @@ export async function subscribe(
     console.error(existingError);
 
     return {
-      success: false,
-      message:
-        "Unable to verify your email.",
+      status: "server_error",
+      message: "Unable to verify your email.",
     };
 
   }
@@ -113,9 +119,9 @@ export async function subscribe(
   if (existing) {
 
     return {
-      success: false,
+      status: "duplicate",
       message:
-        "You're already on the waitlist 🚀",
+        "You're already on our waitlist. We'll notify you when we launch.",
     };
 
   }
@@ -135,9 +141,8 @@ export async function subscribe(
     console.error(insertError);
 
     return {
-      success: false,
-      message:
-        "Unable to join the waitlist.",
+      status: "server_error",
+      message: "Unable to join the waitlist.",
     };
 
   }
@@ -181,9 +186,9 @@ export async function subscribe(
      */
 
     return {
-      success: true,
+      status: "email_failed",
       message:
-        "You're on the waitlist! We couldn't send the welcome email right now, but your spot is confirmed.",
+        "You're on the waitlist! Your spot is confirmed, but we couldn't send the welcome email right now.",
     };
 
   }
@@ -193,12 +198,9 @@ export async function subscribe(
   /* ============================= */
 
   return {
-
-    success: true,
-
+    status: "success",
     message:
-      "🎉 Welcome aboard! Check your inbox for your welcome email.",
-
+      "You're officially on the waitlist. We'll notify you when we launch.",
   };
 
 }

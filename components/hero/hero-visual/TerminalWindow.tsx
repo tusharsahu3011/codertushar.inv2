@@ -16,12 +16,15 @@ export default function TerminalWindow() {
             className="absolute bottom-10 right-8 w-[260px] overflow-hidden rounded-2xl border border-white/10 bg-[#050816]/90 shadow-xl transition-all duration-300 hover:border-cyan-400/30 hover:shadow-2xl hover:shadow-cyan-500/10"
         >
             {/* Header */}
-            <div className="border-b border-white/10 px-4 py-3">
-                <span className="font-mono text-xs text-zinc-500">
+            <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                <span className="h-2.5 w-2.5 rounded-full bg-yellow-500" />
+                <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+
+                <span className="ml-3 text-xs text-zinc-500">
                     terminal
                 </span>
             </div>
-
             {/* Body */}
             <div className="space-y-2 p-4 font-mono text-xs">
                 <p className="text-emerald-400">$ git push</p>

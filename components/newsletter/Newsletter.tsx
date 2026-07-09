@@ -1,18 +1,112 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    useTransition,
+} from "react";
+
+import {
+    CircleAlert,
+    CircleCheck,
+    LoaderCircle,
+    Mail,
+    MailCheck,
+} from "lucide-react";
 
 import {
     Turnstile,
     type TurnstileInstance,
 } from "@marsidev/react-turnstile";
 
+import { subscribe } from "@/app/actions/newsletter";
+
 import Container from "@/components/ui/Container";
 import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 
-import { subscribe } from "@/app/actions/newsletter";
 import { trackEvent } from "@/lib/analytics";
+
+type NewsletterStatus =
+    | "idle"
+    | "valid"
+    | "verifying"
+    | "joining"
+    | "success"
+    | "duplicate"
+    | "email_failed"
+    | "validation_error"
+    | "verification_error"
+    | "server_error";
+
+const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const STATUS_CONFIG = {
+
+    idle: {
+        button: "Notify Me",
+        border:
+            "border-white/10 focus:border-blue-500/60",
+    },
+
+    valid: {
+        button: "Notify Me",
+        border:
+            "border-blue-500/50 focus:border-blue-500",
+    },
+
+    verifying: {
+        button: "Verifying...",
+        border:
+            "border-blue-500/50 focus:border-blue-500",
+    },
+
+    joining: {
+        button: "Joining Waitlist...",
+        border:
+            "border-blue-500/50 focus:border-blue-500",
+    },
+
+    success: {
+        button: "Joined",
+        border:
+            "border-emerald-500/50 focus:border-emerald-500",
+    },
+
+    duplicate: {
+        button: "Already Joined",
+        border:
+            "border-blue-500/50 focus:border-blue-500",
+    },
+
+    email_failed: {
+        button: "Joined",
+        border:
+            "border-emerald-500/50 focus:border-emerald-500",
+    },
+
+    validation_error: {
+        button: "Notify Me",
+        border:
+            "border-red-500/50 focus:border-red-500",
+    },
+
+    verification_error: {
+        button: "Verify Again",
+        border:
+            "border-red-500/50 focus:border-red-500",
+    },
+
+    server_error: {
+        button: "Try Again",
+        border:
+            "border-red-500/50 focus:border-red-500",
+    },
+
+} as const;
 
 export default function Newsletter() {
 
@@ -22,8 +116,8 @@ export default function Newsletter() {
     const [message, setMessage] =
         useState("");
 
-    const [success, setSuccess] =
-        useState(false);
+    const [status, setStatus] =
+        useState<NewsletterStatus>("idle");
 
     const [
         turnstileToken,
@@ -35,19 +129,130 @@ export default function Newsletter() {
         startTransition,
     ] = useTransition();
 
-    const turnstileRef = useRef<TurnstileInstance | null>(null);
+    const turnstileRef =
+        useRef<TurnstileInstance | null>(null);
 
-    function resetForm() {
+    const isEmailValid =
+        useMemo(() => {
 
-        setEmail("");
+            return emailRegex.test(
+                email.trim()
+            );
 
-        setMessage("");
+        }, [email]);
 
-        setSuccess(false);
+    const isLocked =
 
-        setTurnstileToken("");
+        status === "success" ||
+        status === "duplicate" ||
+        status === "email_failed";
 
-        turnstileRef.current?.reset();
+    const isLoading =
+
+        status === "verifying" ||
+        status === "joining";
+
+    const isButtonDisabled =
+
+        !isEmailValid ||
+        isPending ||
+        isLocked; useEffect(() => {
+
+            if (isLocked) {
+                return;
+            }
+
+            const value =
+                email.trim();
+
+            if (!value) {
+
+                setStatus("idle");
+                setMessage("");
+
+                return;
+
+            }
+
+            if (emailRegex.test(value)) {
+
+                setStatus("valid");
+                setMessage("");
+
+            } else {
+
+                setStatus("idle");
+
+            }
+
+        }, [
+            email,
+            isLocked,
+        ]);
+
+    function getInputIcon() {
+
+        switch (status) {
+
+            case "success":
+            case "email_failed":
+
+                return (
+                    <CircleCheck
+                        size={20}
+                        className="text-emerald-400"
+                    />
+                );
+
+            case "duplicate":
+
+                return (
+                    <MailCheck
+                        size={20}
+                        className="text-blue-400"
+                    />
+                );
+
+            case "validation_error":
+            case "verification_error":
+            case "server_error":
+
+                return (
+                    <CircleAlert
+                        size={20}
+                        className="text-red-400"
+                    />
+                );
+
+            case "valid":
+
+                return (
+                    <MailCheck
+                        size={20}
+                        className="text-blue-400"
+                    />
+                );
+
+            case "verifying":
+            case "joining":
+
+                return (
+                    <LoaderCircle
+                        size={20}
+                        className="animate-spin text-zinc-300"
+                    />
+                );
+
+            default:
+
+                return (
+                    <Mail
+                        size={20}
+                        className="text-zinc-500"
+                    />
+                );
+
+        }
 
     }
 
@@ -57,31 +262,34 @@ export default function Newsletter() {
 
         e.preventDefault();
 
+        if (
+            isButtonDisabled
+        ) {
+            return;
+        }
+
         setMessage("");
 
-        if (!email.trim()) {
+        setStatus(
+            "verifying"
+        );
 
-            setSuccess(false);
+        turnstileRef.current?.execute();
 
-            setMessage(
-                "Please enter your email address."
-            );
+    }
 
-            return;
+    async function handleTurnstileSuccess(
+        token: string
+    ) {
 
-        }
+        setTurnstileToken(
+            token
+        );
 
-        if (!turnstileToken) {
+        setStatus(
+            "joining"
+        );
 
-            setSuccess(false);
-
-            setMessage(
-                "Please complete the verification."
-            );
-
-            return;
-
-        }
         startTransition(async () => {
 
             trackEvent(
@@ -91,18 +299,21 @@ export default function Newsletter() {
             const result =
                 await subscribe(
                     email,
-                    turnstileToken
+                    token
                 );
 
-            setSuccess(
-                result.success
+            setStatus(
+                result.status
             );
 
             setMessage(
                 result.message
             );
 
-            if (result.success) {
+            if (
+                result.status === "success" ||
+                result.status === "email_failed"
+            ) {
 
                 trackEvent(
                     "waitlist_joined",
@@ -112,21 +323,47 @@ export default function Newsletter() {
                     }
                 );
 
-                resetForm();
-
-            } else {
-
-                trackEvent(
-                    "waitlist_join_failed"
-                );
-
-                turnstileRef.current?.reset();
-
-                setTurnstileToken("");
+                return;
 
             }
 
+            trackEvent(
+                "waitlist_join_failed"
+            );
+
+            turnstileRef.current?.reset();
+
+            setTurnstileToken("");
+
         });
+
+    }
+
+    function handleTurnstileError() {
+
+        setTurnstileToken("");
+
+        setStatus(
+            "verification_error"
+        );
+
+        setMessage(
+            "Security verification failed. Please try again."
+        );
+
+    }
+
+    function handleTurnstileExpire() {
+
+        setTurnstileToken("");
+
+        setStatus(
+            "verification_error"
+        );
+
+        setMessage(
+            "Verification expired. Please try again."
+        );
 
     }
 
@@ -150,13 +387,7 @@ export default function Newsletter() {
                             backdrop-blur-xl
                             md:p-16
                         "
-                    >
-
-                        <div
-                            className="
-                                text-center
-                            "
-                        >
+                    >                        <div className="text-center">
 
                             <p
                                 className="
@@ -169,6 +400,7 @@ export default function Newsletter() {
                             >
                                 Stay Updated
                             </p>
+
                             <h2
                                 className="
                                     text-4xl
@@ -200,7 +432,8 @@ export default function Newsletter() {
                                 <br />
 
                                 You&apos;ll receive only launch
-                                updates—no spam, ever.
+                                updates — no spam, ever.
+
                             </p>
 
                         </div>
@@ -221,95 +454,128 @@ export default function Newsletter() {
                                 Email address
                             </label>
 
-                            <input
-                                id="newsletter-email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Enter your email address"
-                                autoComplete="email"
-                                aria-label="Email address"
-                                required
-                                disabled={isPending}
-                                className="
-        h-14
-        w-full
-        rounded-2xl
-        border
-        border-white/10
-        bg-black/20
-        px-5
-        text-white
-        placeholder:text-zinc-500
-        outline-none
-        transition-all
-        duration-300
-        focus:border-blue-500/60
-        focus:ring-2
-        focus:ring-blue-500/20
-        disabled:cursor-not-allowed
-        disabled:opacity-60
-    "
-                            />
+                            <div className="relative">
 
-                            <div className="mt-5 flex justify-center">
-                                <Turnstile
-                                    ref={turnstileRef}
-                                    siteKey={
-                                        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                                    options={{
-                                        theme: "dark",
-                                        size: "normal",
-                                    }}
-                                    onSuccess={(token) => {
-                                        setTurnstileToken(token);
-                                        setSuccess(false);
-                                        setMessage("");
-                                    }}
-                                    onExpire={() => {
-                                        setTurnstileToken("");
-                                        setSuccess(false);
-                                        setMessage(
-                                            "Verification expired. Please verify again."
-                                        );
-                                    }}
-                                    onError={() => {
-                                        setTurnstileToken("");
-                                        setSuccess(false);
-                                        setMessage(
-                                            "Verification failed. Please try again."
-                                        );
-                                    }}
+                                <input
+                                    id="newsletter-email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) =>
+                                        setEmail(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="you@example.com"
+                                    autoComplete="email"
+                                    aria-label="Email address"
+                                    readOnly={isLocked}
+                                    className={`
+                                        h-14
+                                        w-full
+                                        rounded-2xl
+                                        border
+                                        bg-black/20
+                                        pl-5
+                                        pr-14
+                                        text-white
+                                        placeholder:text-zinc-500
+                                        outline-none
+                                        transition-all
+                                        duration-300
+                                        ${STATUS_CONFIG[status].border}
+                                    `}
                                 />
+
+                                <div
+                                    className="
+                                        pointer-events-none
+                                        absolute
+                                        right-5
+                                        top-1/2
+                                        -translate-y-1/2
+                                    "
+                                >
+                                    {getInputIcon()}
+                                </div>
+
                             </div>
+
+                            <Turnstile
+                                ref={turnstileRef}
+                                siteKey={
+                                    process.env
+                                        .NEXT_PUBLIC_TURNSTILE_SITE_KEY!
+                                }
+                                options={{
+                                    theme: "dark",
+                                    size: "invisible",
+                                }}
+                                onSuccess={
+                                    handleTurnstileSuccess
+                                }
+                                onError={
+                                    handleTurnstileError
+                                }
+                                onExpire={
+                                    handleTurnstileExpire
+                                }
+                            />
 
                             <button
                                 type="submit"
-                                disabled={isPending}
-                                className="
-        mt-5
-        h-14
-        w-full
-        rounded-2xl
-        bg-white
-        px-8
-        font-semibold
-        text-slate-900
-        transition-all
-        duration-300
-        hover:scale-[1.02]
-        hover:bg-slate-100
-        active:scale-[0.98]
-        disabled:cursor-not-allowed
-        disabled:opacity-60
-    "
+                                disabled={isButtonDisabled}
+                                className={`
+                                    mt-6
+                                    flex
+                                    h-14
+                                    w-full
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    rounded-2xl
+                                    font-semibold
+                                    transition-all
+                                    duration-300
+
+                                    ${status === "success" ||
+                                        status === "email_failed"
+                                        ? "bg-emerald-500 text-white"
+                                        : status === "duplicate"
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-white text-slate-900 hover:scale-[1.02] hover:bg-slate-100"
+                                    }
+
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-60
+                                `}
                             >
-                                {isPending ? "Joining..." : "Notify Me"}
-                            </button>
 
-                        </form>
+                                {isLoading && (
+                                    <LoaderCircle
+                                        size={18}
+                                        className="animate-spin"
+                                    />
+                                )}
 
-                        {/* Status */}
+                                {!isLoading &&
+                                    (status === "success" ||
+                                        status === "email_failed") && (
+                                        <CircleCheck
+                                            size={18}
+                                        />
+                                    )}
+
+                                {!isLoading &&
+                                    status === "duplicate" && (
+                                        <MailCheck
+                                            size={18}
+                                        />
+                                    )}
+
+                                {STATUS_CONFIG[status].button}
+
+                            </button>                        </form>
+
                         <div
                             className="
                                 mt-6
@@ -333,14 +599,51 @@ export default function Newsletter() {
                                         transition-all
                                         duration-300
 
-                                        ${success
+                                        ${status === "success" ||
+                                            status === "email_failed"
                                             ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                                            : "border-red-500/20 bg-red-500/10 text-red-300"
+                                            : status === "duplicate"
+                                                ? "border-blue-500/20 bg-blue-500/10 text-blue-300"
+                                                : "border-red-500/20 bg-red-500/10 text-red-300"
                                         }
                                     `}
                                 >
 
-                                    {message}
+                                    <div
+                                        className="
+                                            flex
+                                            items-center
+                                            justify-center
+                                            gap-2
+                                        "
+                                    >
+
+                                        {(status === "success" ||
+                                            status === "email_failed") && (
+                                                <CircleCheck
+                                                    size={18}
+                                                />
+                                            )}
+
+                                        {status === "duplicate" && (
+                                            <MailCheck
+                                                size={18}
+                                            />
+                                        )}
+
+                                        {(status === "validation_error" ||
+                                            status === "verification_error" ||
+                                            status === "server_error") && (
+                                                <CircleAlert
+                                                    size={18}
+                                                />
+                                            )}
+
+                                        <span>
+                                            {message}
+                                        </span>
+
+                                    </div>
 
                                 </div>
 
@@ -354,14 +657,15 @@ export default function Newsletter() {
                                         text-zinc-500
                                     "
                                 >
-                                    No spam.
-                                    {" "}
-                                    Only one email when we launch.
+                                    Your email is only used for
+                                    launch updates. No spam.
+                                    Ever.
                                 </p>
 
                             )}
 
                         </div>
+
                         <div
                             className="
                                 mt-8
@@ -377,8 +681,7 @@ export default function Newsletter() {
                                     text-xs
                                     uppercase
                                     tracking-[0.25em]
-                                    text-zinc-600
-                                "
+                                    text-zinc-600"
                             >
                                 Privacy First
                             </p>
@@ -396,9 +699,12 @@ export default function Newsletter() {
                                 never shared with third parties,
                                 and will only be used to send
                                 launch updates and important
-                                announcements about
-                                {" "}
-                                <span className="text-zinc-300">
+                                announcements about{" "}
+                                <span
+                                    className="
+                                        text-zinc-300
+                                    "
+                                >
                                     codertushar.in
                                 </span>.
                             </p>
@@ -406,6 +712,7 @@ export default function Newsletter() {
                         </div>
 
                     </div>
+
                 </Reveal>
 
             </Container>
