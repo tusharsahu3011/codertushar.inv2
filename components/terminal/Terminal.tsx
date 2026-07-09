@@ -1,39 +1,42 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 
 import Container from "@/components/ui/Container";
 import Section from "@/components/ui/Section";
 import Card from "@/components/ui/Card";
 
-const terminalLines = [
+// Each line: what it says, and what color it
+// renders in. Empty text = a blank spacer line
+// (no typing, just a short pause).
+const terminalLines: { text: string; color: string }[] = [
     {
         text: "$ npm run dev",
         color: "text-emerald-400",
     },
     {
-        text: "▲ Next.js 16",
-        color: "text-blue-400",
+        text: "",
+        color: "",
+    },
+    {
+        text: "> codertushar.in@0.1.0 dev",
+        color: "text-zinc-500",
+    },
+    {
+        text: "> next dev",
+        color: "text-zinc-500",
     },
     {
         text: "",
         color: "",
     },
     {
-        text: "Creating an amazing developer experience...",
-        color: "text-zinc-400",
+        text: "   ▲ Next.js 16.0.1",
+        color: "text-cyan-400",
     },
     {
-        text: "Building UI components...",
-        color: "text-zinc-400",
-    },
-    {
-        text: "Optimizing performance...",
-        color: "text-zinc-400",
-    },
-    {
-        text: "Launching codertushar.in...",
+        text: "   - Local:   http://localhost:3000",
         color: "text-zinc-400",
     },
     {
@@ -41,129 +44,270 @@ const terminalLines = [
         color: "",
     },
     {
-        text: "✓ Ready in 1.2s",
+        text: " ✓ Ready in 890ms",
+        color: "text-emerald-400",
+    },
+    {
+        text: " ○ Compiling / ...",
+        color: "text-amber-400",
+    },
+    {
+        text: " ✓ Compiled / in 1.2s",
         color: "text-emerald-400",
     },
 ];
 
+const START_DELAY_MS = 300;
+const TYPE_SPEED_MS = 22;
+const LINE_PAUSE_MS = 260;
+const BLANK_LINE_PAUSE_MS = 180;
+
+function TerminalCursor() {
+    return (
+        <motion.span
+            animate={{
+                opacity: [1, 0, 1],
+            }}
+            transition={{
+                duration: 1,
+                repeat: Infinity,
+                ease: "linear",
+            }}
+            className="ml-1 inline-block h-5 w-[2px] rounded-full bg-emerald-400 align-middle"
+        />
+    );
+}
+
 export default function Terminal() {
-    const [visibleIndex, setVisibleIndex] = useState(0);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    // once: true -> the animation is only ever
+    // armed the first time the terminal scrolls
+    // into view; scrolling away and back won't
+    // retrigger it.
+    const isInView = useInView(containerRef, {
+        once: true,
+        amount: 0.4,
+    });
+
+    const hasStarted = useRef(false);
+
+    const [lineIndex, setLineIndex] = useState(0);
+    const [charIndex, setCharIndex] = useState(0);
+    const [isDone, setIsDone] = useState(false);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setVisibleIndex((prev) => {
-                if (prev >= terminalLines.length) {
-                    clearInterval(interval);
-                    return prev;
-                }
 
-                return prev + 1;
-            });
-        }, 600);
+        if (!isInView || hasStarted.current) {
+            return;
+        }
 
-        return () => clearInterval(interval);
-    }, []);
+        hasStarted.current = true;
+
+        let cancelled = false;
+        let currentLine = 0;
+        let currentChar = 0;
+        let timeoutId: ReturnType<typeof setTimeout>;
+
+        function typeNextChar() {
+
+            if (cancelled) {
+                return;
+            }
+
+            if (currentLine >= terminalLines.length) {
+                setIsDone(true);
+                return;
+            }
+
+            const line = terminalLines[currentLine];
+
+            if (line.text === "") {
+
+                currentLine += 1;
+                currentChar = 0;
+
+                setLineIndex(currentLine);
+                setCharIndex(0);
+
+                timeoutId = setTimeout(
+                    typeNextChar,
+                    BLANK_LINE_PAUSE_MS
+                );
+
+                return;
+
+            }
+
+            if (currentChar < line.text.length) {
+
+                currentChar += 1;
+                setCharIndex(currentChar);
+
+                timeoutId = setTimeout(
+                    typeNextChar,
+                    TYPE_SPEED_MS
+                );
+
+            } else {
+
+                currentLine += 1;
+                currentChar = 0;
+
+                setLineIndex(currentLine);
+                setCharIndex(0);
+
+                timeoutId = setTimeout(
+                    typeNextChar,
+                    LINE_PAUSE_MS
+                );
+
+            }
+
+        }
+
+        timeoutId = setTimeout(
+            typeNextChar,
+            START_DELAY_MS
+        );
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeoutId);
+        };
+
+    }, [isInView]);
 
     return (
         <Section>
             <Container>
 
-                <Card className="overflow-hidden">
+                <div ref={containerRef}>
 
-                    {/* Header */}
-                    <div className="flex h-14 items-center justify-between border-b border-white/10 px-6">
+                    <Card className="overflow-hidden">
 
-                        <div className="flex items-center gap-2">
+                        {/* Header */}
+                        <div className="flex h-14 items-center justify-between border-b border-white/10 px-6">
 
-                            <span className="h-3 w-3 rounded-full bg-red-500" />
+                            <div className="flex items-center gap-2">
 
-                            <span className="h-3 w-3 rounded-full bg-yellow-500" />
+                                <span className="h-3 w-3 rounded-full bg-red-500" />
 
-                            <span className="h-3 w-3 rounded-full bg-green-500" />
+                                <span className="h-3 w-3 rounded-full bg-yellow-500" />
 
-                        </div>
+                                <span className="h-3 w-3 rounded-full bg-green-500" />
 
-                        <div className="flex items-center gap-3">
+                            </div>
 
-                            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
-                                LIVE
-                            </span>
+                            <div className="flex items-center gap-3">
 
-                            <span className="font-mono text-sm text-zinc-500">
-                                ~/codertushar.in
-                            </span>
+                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                                    LIVE
+                                </span>
 
-                        </div>
-
-                    </div>
-
-                    {/* Body */}
-                    <div className="bg-[#050816] px-8 py-8">
-
-                        <div className="min-h-[340px]">
-
-                            <div className="space-y-2 font-mono text-[15px] leading-7">
-                                {terminalLines.map((line, index) => {
-
-                                    const visible = index < visibleIndex;
-                                    const current = index === visibleIndex - 1;
-
-                                    return (
-
-                                        <motion.div
-                                            key={index}
-                                            initial={{
-                                                opacity: 0,
-                                                y: 8,
-                                            }}
-                                            animate={{
-                                                opacity: visible ? 1 : 0,
-                                                y: visible ? 0 : 8,
-                                            }}
-                                            transition={{
-                                                duration: 0.35,
-                                                ease: "easeOut",
-                                            }}
-                                            className="min-h-7"
-                                        >
-
-                                            {line.text === "" ? (
-                                                <span>&nbsp;</span>
-                                            ) : (
-                                                <span
-                                                    className={`${line.color} inline-flex items-center`}
-                                                >
-                                                    {visible && line.text}
-
-                                                    {current && (
-                                                        <motion.span
-                                                            animate={{
-                                                                opacity: [1, 0, 1],
-                                                            }}
-                                                            transition={{
-                                                                duration: 1,
-                                                                repeat: Infinity,
-                                                                ease: "linear",
-                                                            }}
-                                                            className="ml-1 inline-block h-5 w-[2px] rounded-full bg-emerald-400"
-                                                        />
-                                                    )}
-                                                </span>
-                                            )}
-
-                                        </motion.div>
-
-                                    );
-
-                                })}
+                                <span className="font-mono text-sm text-zinc-500">
+                                    ~/codertushar.in
+                                </span>
 
                             </div>
 
                         </div>
 
-                    </div>
+                        {/* Body */}
+                        <div className="bg-[#050816] px-8 py-8">
 
-                </Card>
+                            <div className="min-h-[300px]">
+
+                                <div className="space-y-2 font-mono text-[15px] leading-7">
+                                    {terminalLines.map((line, index) => {
+
+                                        const isFullyTyped = index < lineIndex;
+                                        const isCurrentlyTyping = index === lineIndex && !isDone;
+                                        const isVisible = isFullyTyped || isCurrentlyTyping;
+
+                                        if (!isVisible) {
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="min-h-7"
+                                                />
+                                            );
+                                        }
+
+                                        const displayText = isFullyTyped
+                                            ? line.text
+                                            : line.text.slice(0, charIndex);
+
+                                        return (
+
+                                            <motion.div
+                                                key={index}
+                                                initial={{
+                                                    opacity: 0,
+                                                    y: 8,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    y: 0,
+                                                }}
+                                                transition={{
+                                                    duration: 0.25,
+                                                    ease: "easeOut",
+                                                }}
+                                                className="min-h-7"
+                                            >
+
+                                                {line.text === "" ? (
+                                                    <span>&nbsp;</span>
+                                                ) : (
+                                                    <span
+                                                        className={`${line.color} inline-flex items-center`}
+                                                    >
+                                                        {displayText}
+
+                                                        {isCurrentlyTyping && (
+                                                            <TerminalCursor />
+                                                        )}
+                                                    </span>
+                                                )}
+
+                                            </motion.div>
+
+                                        );
+
+                                    })}
+
+                                    {isDone && (
+                                        <motion.div
+                                            initial={{
+                                                opacity: 0,
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                            }}
+                                            transition={{
+                                                duration: 0.3,
+                                                delay: 0.2,
+                                            }}
+                                            className="flex min-h-7 items-center"
+                                        >
+                                            <span className="text-emerald-400">
+                                                $
+                                            </span>
+
+                                            <TerminalCursor />
+                                        </motion.div>
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </Card>
+
+                </div>
 
             </Container>
         </Section>

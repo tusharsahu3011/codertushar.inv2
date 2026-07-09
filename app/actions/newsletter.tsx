@@ -101,7 +101,7 @@ export async function subscribe(
     error: existingError,
   } = await supabase
     .from("waitlist")
-    .select("id")
+    .select("id, duplicate_reminder_sent_at")
     .eq("email", value)
     .maybeSingle();
 
@@ -117,6 +117,76 @@ export async function subscribe(
   }
 
   if (existing) {
+
+    /*
+     * Already on the waitlist. Send a
+     * reminder email, but only the very
+     * first time — repeated submits for the
+     * same (already-registered) email must
+     * NOT trigger another email.
+     */
+
+    if (!existing.duplicate_reminder_sent_at) {
+
+      const {
+        error: reminderEmailError,
+      } = await resend.emails.send({
+
+        from:
+          "Coder Tushar <hello@codertushar.in>",
+
+        to: value,
+
+        subject:
+          "You're already on the Coder Tushar Waitlist",
+
+        react: (
+          <WelcomeEmail
+            name="Developer"
+            email={value}
+          />
+        ),
+
+      });
+
+      if (reminderEmailError) {
+
+        console.error(
+          "Resend (duplicate reminder):",
+          reminderEmailError
+        );
+
+        /*
+         * Don't fail the request just
+         * because the reminder email
+         * couldn't be sent — the user is
+         * still on the waitlist either way.
+         */
+
+      } else {
+
+        const {
+          error: markSentError,
+        } = await supabase
+          .from("waitlist")
+          .update({
+            duplicate_reminder_sent_at:
+              new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+
+        if (markSentError) {
+
+          console.error(
+            "Supabase (mark reminder sent):",
+            markSentError
+          );
+
+        }
+
+      }
+
+    }
 
     return {
       status: "duplicate",

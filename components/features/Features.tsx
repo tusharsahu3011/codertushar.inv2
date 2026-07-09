@@ -14,6 +14,9 @@ import FeatureCard from "./FeatureCard";
 import Reveal from "@/components/ui/Reveal";
 
 const features = [
+    // "as const" (see bottom of array) keeps each
+    // `color` narrowed to its literal string type
+    // so it matches FeatureCard's FeatureColor union.
     {
         icon: BookOpen,
         title: "Programming Notes",
@@ -56,7 +59,7 @@ const features = [
             "Join a growing community of learners and build your programming journey together.",
         color: "pink",
     },
-];
+] as const;
 
 export default function Features() {
     return (
