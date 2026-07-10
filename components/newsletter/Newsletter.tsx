@@ -210,7 +210,8 @@ export default function Newsletter() {
     const isButtonDisabled =
         !isEmailValid ||
         isPending ||
-        isLocked;
+        isLocked ||
+        isLoading;
 
     function getInputIcon() {
 
@@ -593,12 +594,11 @@ export default function Newsletter() {
                                     transition-all
                                     duration-300
 
-                                    ${
-                                        displayStatus === "success" ||
+                                    ${displayStatus === "success" ||
                                         displayStatus === "email_failed"
-                                            ? "bg-emerald-500 text-white disabled:opacity-100"
-                                            : displayStatus === "duplicate"
-                                            ? "bg-blue-500 text-white disabled:opacity-100"
+                                        ? "bg-emerald-500 text-black disabled:opacity-90"
+                                        : displayStatus === "duplicate"
+                                            ? "bg-blue-500 text-black disabled:opacity-90"
                                             : "bg-white text-slate-900 hover:scale-[1.02] hover:bg-slate-100 disabled:opacity-60"
                                     }
 
@@ -646,8 +646,6 @@ export default function Newsletter() {
                                     role="status"
                                     aria-live="polite"
                                     className={`
-                                        rounded-2xl
-                                        border
                                         px-5
                                         py-4
                                         text-center
@@ -656,13 +654,12 @@ export default function Newsletter() {
                                         transition-all
                                         duration-300
 
-                                        ${
-                                            displayStatus === "success" ||
+                                        ${displayStatus === "success" ||
                                             displayStatus === "email_failed"
-                                                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                                                : displayStatus === "duplicate"
-                                                ? "border-blue-500/20 bg-blue-500/10 text-blue-300"
-                                                : "border-red-500/20 bg-red-500/10 text-red-300"
+                                            ? "text-emerald-300"
+                                            : displayStatus === "duplicate"
+                                                ? "text-blue-300"
+                                                : "text-red-300"
                                         }
                                     `}
                                 >
@@ -678,10 +675,10 @@ export default function Newsletter() {
 
                                         {(displayStatus === "success" ||
                                             displayStatus === "email_failed") && (
-                                            <CircleCheck
-                                                size={18}
-                                            />
-                                        )}
+                                                <CircleCheck
+                                                    size={18}
+                                                />
+                                            )}
 
                                         {displayStatus === "duplicate" && (
                                             <MailCheck
@@ -692,10 +689,10 @@ export default function Newsletter() {
                                         {(displayStatus === "validation_error" ||
                                             displayStatus === "verification_error" ||
                                             displayStatus === "server_error") && (
-                                            <CircleAlert
-                                                size={18}
-                                            />
-                                        )}
+                                                <CircleAlert
+                                                    size={18}
+                                                />
+                                            )}
 
                                         <span>
                                             {displayMessage}
@@ -740,7 +737,7 @@ export default function Newsletter() {
                                     uppercase
                                     tracking-[0.25em]
                                     text-zinc-600"
-                                >
+                            >
                                 Privacy First
                             </p>
 
