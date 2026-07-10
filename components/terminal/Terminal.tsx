@@ -48,11 +48,15 @@ const terminalLines: { text: string; color: string }[] = [
         color: "text-emerald-400",
     },
     {
-        text: " ○ Compiling / ...",
-        color: "text-amber-400",
+        text: "",
+        color: "",
     },
     {
-        text: " ✓ Compiled / in 1.2s",
+        text: "$ git push origin main",
+        color: "text-blue-400",
+    },
+    {
+        text: " ✓ Deployed to codertushar.in 🚀",
         color: "text-emerald-400",
     },
 ];
@@ -184,7 +188,7 @@ export default function Terminal() {
 
                 <div ref={containerRef}>
 
-                    <Card className="overflow-hidden">
+                    <Card className="overflow-hidden transition-all duration-300 hover:border-blue-400/30 hover:shadow-2xl hover:shadow-blue-500/10">
 
                         {/* Header */}
                         <div className="flex h-14 items-center justify-between border-b border-white/10 px-6">
@@ -277,27 +281,29 @@ export default function Terminal() {
 
                                     })}
 
-                                    {isDone && (
-                                        <motion.div
-                                            initial={{
-                                                opacity: 0,
-                                            }}
-                                            animate={{
-                                                opacity: 1,
-                                            }}
-                                            transition={{
-                                                duration: 0.3,
-                                                delay: 0.2,
-                                            }}
-                                            className="flex min-h-7 items-center"
-                                        >
-                                            <span className="text-emerald-400">
-                                                $
-                                            </span>
+                                    <motion.div
+                                        initial={{
+                                            opacity: 0,
+                                        }}
+                                        animate={{
+                                            opacity: isDone ? 1 : 0,
+                                        }}
+                                        transition={{
+                                            duration: 0.3,
+                                            delay: isDone ? 0.2 : 0,
+                                        }}
+                                        className="flex min-h-7 items-center"
+                                    >
+                                        {isDone && (
+                                            <>
+                                                <span className="text-emerald-400">
+                                                    $
+                                                </span>
 
-                                            <TerminalCursor />
-                                        </motion.div>
-                                    )}
+                                                <TerminalCursor />
+                                            </>
+                                        )}
+                                    </motion.div>
 
                                 </div>
 
