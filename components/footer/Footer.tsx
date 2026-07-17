@@ -21,7 +21,9 @@ export default function Footer() {
                         <div className="flex items-center gap-4">
 
                             <a
-                                href="#"
+                                href="https://github.com/codertushar-dev"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="rounded-xl border border-white/10 bg-white/5 p-3 transition-colors hover:border-white/20 hover:bg-white/10"
                                 aria-label="GitHub"
                             >
@@ -29,7 +31,9 @@ export default function Footer() {
                             </a>
 
                             <a
-                                href="#"
+                                href="https://instagram.com/coder.tushar"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="rounded-xl border border-white/10 bg-white/5 p-3 transition-colors hover:border-white/20 hover:bg-white/10"
                                 aria-label="Instagram"
                             >
@@ -37,7 +41,9 @@ export default function Footer() {
                             </a>
 
                             <a
-                                href="#"
+                                href="https://linkedin.com/in/tusharsahu3011"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="rounded-xl border border-white/10 bg-white/5 p-3 transition-colors hover:border-white/20 hover:bg-white/10"
                                 aria-label="LinkedIn"
                             >
