@@ -14,7 +14,7 @@ export default function Navbar() {
                         aria-label={`${siteConfig.name} Home`}
                         className="flex items-center gap-3 rounded-xl transition-all duration-300 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#030712]"
                     >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 font-extrabold tracking-tight text-white shadow-lg shadow-blue-700/30">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 font-extrabold tracking-tight text-white shadow-lg shadow-blue-700/30">
                             CT
                         </div>
 

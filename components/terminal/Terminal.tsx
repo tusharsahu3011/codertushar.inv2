@@ -56,7 +56,7 @@ const terminalLines: { text: string; color: string }[] = [
         color: "text-blue-400",
     },
     {
-        text: " ✓ Deployed to codertushar.in 🚀",
+        text: " ✓ Deployed to codertushar.in",
         color: "text-emerald-400",
     },
 ];
