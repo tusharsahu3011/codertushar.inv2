@@ -427,10 +427,12 @@ export default function Newsletter() {
                 <Reveal>
 
                     <div
+                        id="waitlist"
                         className="
                             relative
                             mx-auto
                             max-w-4xl
+                            scroll-mt-28
                             rounded-[32px]
                             border
                             border-white/10

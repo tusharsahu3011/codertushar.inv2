@@ -2,7 +2,10 @@ import { ButtonHTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva(
+// Exported so link-based CTAs (e.g. external links that must be
+// real <a> tags, not <button>s) can reuse the exact same visual
+// styles without duplicating Tailwind classes.
+export const buttonVariants = cva(
     "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300 active:scale-95 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
     {
         variants: {

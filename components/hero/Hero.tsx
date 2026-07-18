@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Container from "@/components/ui/Container";
 import Section from "@/components/ui/Section";
-import Button from "@/components/ui/Button";
+import Button, { buttonVariants } from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Heading from "@/components/ui/Heading";
 import Text from "@/components/ui/Text";
@@ -62,20 +62,33 @@ export default function Hero() {
 
                         <div className="mt-12 flex flex-col gap-4 sm:flex-row">
 
-                            <Button 
-                            size="lg" 
-                            aria-label="Explore the upcoming Coder Tushar website"
+                            <Button
+                                size="lg"
+                                aria-label="Jump to the waitlist signup"
+                                onClick={() => {
+                                    document
+                                        .getElementById("waitlist")
+                                        ?.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "start",
+                                        });
+                                }}
                             >
-                                Explore Soon
+                                Join the Waitlist
                             </Button>
 
-                            <Button 
-                            variant="secondary" 
-                            size="lg" 
-                            aria-label="Follow the development journey"
+                            <a
+                                href="https://github.com/codertushar-dev"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="View Coder Tushar's GitHub profile (opens in a new tab)"
+                                className={buttonVariants({
+                                    variant: "secondary",
+                                    size: "lg",
+                                })}
                             >
-                                Follow Journey
-                            </Button>
+                                View on GitHub
+                            </a>
 
                         </div>
 
