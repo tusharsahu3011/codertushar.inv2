@@ -12,5 +12,5 @@ export const siteConfig = {
 
     copyright: `© ${new Date().getFullYear()} Coder Tushar. All rights reserved.`,
 
-    launchDate: "2026-08-01T00:00:00+05:30",
+    launchDate: "2026-08-15T00:00:00+05:30",
 };
